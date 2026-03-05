@@ -17,3 +17,9 @@ OFFSET $4;
 
 -- name: DeleteTransfer :exec
 DELETE FROM transfers WHERE id = $1;
+
+-- name: UpdateTransfer :one
+UPDATE transfers
+SET amount = $2
+WHERE id = $1
+RETURNING *;

@@ -32,6 +32,14 @@ func RandomBalance() int64 {
 	return RandomInt(0, 1000)
 }
 
+func RandomAmount() int64 {
+	return RandomInt(0, 100)
+}
+
+func RandomBoundedAmount(amount int64) int64 {
+	return RandomInt(0, amount)
+}
+
 func RandomCurrency() string {
 	currencies := []string{"EUR", "GBP", "JPY", "NZD"}
 	return currencies[rand.Intn(len(currencies))]
