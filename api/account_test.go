@@ -425,11 +425,12 @@ func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, expected db.Accou
 	t.Helper()
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
+
 	var gotAccount db.Account
 	err = json.Unmarshal(data, &gotAccount)
 	require.NoError(t, err)
 
-	expected.CreatedAt = expected.CreatedAt.Round(0)
-	gotAccount.CreatedAt = gotAccount.CreatedAt.Round(0)
+	expected.CreatedAt = expected.CreatedAt.UTC().Round(0)
+	gotAccount.CreatedAt = gotAccount.CreatedAt.UTC().Round(0)
 	require.Equal(t, expected, gotAccount)
 }
