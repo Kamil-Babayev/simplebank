@@ -11,6 +11,8 @@ import (
 )
 
 func createRandomAccount(t *testing.T) Account {
+	t.Helper()
+
 	arg := CreateAccountParams{
 		Owner:    util.RandomOwner(),
 		Balance:  util.RandomBalance(),
@@ -32,20 +34,6 @@ func createRandomAccount(t *testing.T) Account {
 
 func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
-}
-
-func TestGetAccount(t *testing.T) {
-	account1 := createRandomAccount(t)
-
-	account2, err := testQueries.GetAccount(context.Background(), account1.ID)
-
-	require.NoError(t, err)
-	require.NotEmpty(t, account2)
-	require.Equal(t, account1.ID, account2.ID)
-	require.Equal(t, account1.Owner, account2.Owner)
-	require.Equal(t, account1.Balance, account2.Balance)
-	require.Equal(t, account1.Currency, account2.Currency)
-	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 
 func TestUpdateAccount(t *testing.T) {
@@ -97,4 +85,44 @@ func TestListAccounts(t *testing.T) {
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
 	}
+}
+
+func TestQueries_UpdateAccountData(t *testing.T) {
+	account1 := createRandomAccount(t)
+	arg := UpdateAccountDataParams{
+		ID:       account1.ID,
+		Owner:    sql.NullString{String: util.RandomOwner(), Valid: true},
+		Currency: sql.NullString{String: util.RandomCurrency(), Valid: true},
+	}
+	account2, err := testQueries.UpdateAccountData(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, account2)
+	require.Equal(t, account1.ID, account2.ID)
+	require.Equal(t, arg.Owner.String, account2.Owner)
+	require.Equal(t, arg.Currency.String, account2.Currency)
+	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
+}
+
+func testGetAccount(t *testing.T, testFunc func(context.Context, int64) (Account, error)) {
+	t.Helper()
+
+	account1 := createRandomAccount(t)
+
+	account2, err := testFunc(context.Background(), account1.ID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, account2)
+	require.Equal(t, account1.ID, account2.ID)
+	require.Equal(t, account1.Owner, account2.Owner)
+	require.Equal(t, account1.Balance, account2.Balance)
+	require.Equal(t, account1.Currency, account2.Currency)
+	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
+}
+
+func TestQueries_GetAccountForUpdate(t *testing.T) {
+	testGetAccount(t, testQueries.GetAccountForUpdate)
+}
+
+func TestQueries_GetAccount(t *testing.T) {
+	testGetAccount(t, testQueries.GetAccount)
 }

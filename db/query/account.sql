@@ -24,6 +24,14 @@ SET balance = $2
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdateAccountData :one
+UPDATE accounts
+SET
+    owner    = COALESCE(sqlc.narg('owner'), owner),
+    currency = COALESCE(sqlc.narg('currency'), currency)
+WHERE id = $1
+RETURNING *;
+
 -- name: AddAccountBalance :one
 UPDATE accounts
 SET balance = balance + sqlc.arg(amount)

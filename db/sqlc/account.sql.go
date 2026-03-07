@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const addAccountBalance = `-- name: AddAccountBalance :one
@@ -161,6 +162,34 @@ type UpdateAccountParams struct {
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
 	row := q.db.QueryRowContext(ctx, updateAccount, arg.ID, arg.Balance)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateAccountData = `-- name: UpdateAccountData :one
+UPDATE accounts
+SET
+    owner    = COALESCE($2, owner),
+    currency = COALESCE($3, currency)
+WHERE id = $1
+RETURNING id, owner, balance, currency, created_at
+`
+
+type UpdateAccountDataParams struct {
+	ID       int64          `json:"id"`
+	Owner    sql.NullString `json:"owner"`
+	Currency sql.NullString `json:"currency"`
+}
+
+func (q *Queries) UpdateAccountData(ctx context.Context, arg UpdateAccountDataParams) (Account, error) {
+	row := q.db.QueryRowContext(ctx, updateAccountData, arg.ID, arg.Owner, arg.Currency)
 	var i Account
 	err := row.Scan(
 		&i.ID,
