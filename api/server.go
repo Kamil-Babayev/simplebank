@@ -34,6 +34,10 @@ func NewServer(store db.Store) *Server {
 	// Endpoints for transfers
 	router.POST("/transfers", server.createTransfer)
 
+	// Endpoints for users
+	router.POST("/users", server.createUser)
+	router.GET("/users/:username", server.getUser)
+
 	server.router = router
 	return server
 }
