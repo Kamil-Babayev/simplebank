@@ -42,7 +42,7 @@ func (m *JWTMaker) VerifyToken(token string) (*Payload, error) {
 	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
 
 	if err != nil {
-		var verr jwt.ValidationError
+		var verr *jwt.ValidationError
 		ok := errors.As(err, &verr)
 		if ok && errors.Is(verr.Inner, ErrExpiredToken) {
 			return nil, ErrExpiredToken

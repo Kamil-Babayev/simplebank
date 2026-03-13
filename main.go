@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"simplebank/api"
 	db "simplebank/db/sqlc"
@@ -23,7 +24,10 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+	server, err := api.NewServer(*config, store)
+	if err != nil {
+		log.Fatal(fmt.Errorf("could not start the server: %w", err))
+	}
 
 	log.Fatal(server.Start(config.ServerAddress))
 
